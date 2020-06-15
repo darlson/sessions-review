@@ -18,10 +18,12 @@ module.exports = {
     const hash = bcrypt.hashSync(password, salt)
 
     //Create new user
-    const newUser = await db.create_user([email, role_id, hash])
+    const [newUser] = await db.create_user([email, role_id, hash])
+
+    req.session.user = newUser
 
     //Send back new user
-    res.status(200).send(newUser)
+    res.status(200).send(req.session.user)
   },
 
   login: async (req, res) => {
@@ -46,7 +48,9 @@ module.exports = {
     //Remove hash from our user object
     delete existingUser[0].hash
 
-    res.status(200).send(existingUser[0])
+    req.session.user = existingUser[0]
+
+    res.status(200).send(req.session.user)
   },
   logout: (req, res) => {
     //Save their history/any info you want and then destroy
